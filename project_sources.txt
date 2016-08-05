@@ -1,0 +1,5 @@
+http://machinelearningmastery.com/an-introduction-to-feature-selection/
+http://machinelearningmastery.com/feature-selection-in-python-with-scikit-learn/
+http://scikit-learn.org/stable/modules/pipeline.html
+http://stackoverflow.com/questions/5844672/delete-an-element-from-a-dictionary
+

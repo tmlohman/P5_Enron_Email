@@ -1,25 +1,49 @@
 #!/usr/bin/python
 
 import sys
+import os
 import pickle
-sys.path.append("../tools/")
-
+sys.path.append("tools/")
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data
+from helper_functions import get_features
+from helper_functions import get_outliers
+
 
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
-features_list = ['poi','salary'] # You will need to use more features
+features_list = ['poi', 'outlier_count'] # You will need to use more features
+
+
 
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
 
 ### Task 2: Remove outliers
+# Removing TOTAL values. Other outliers may be indication of POI and 
+# therefore should not be removed.
+del data_dict['TOTAL']
+
+
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
+# get outlier counts from helper functions
+all_feature_list = get_features(data_dict)
+outliers = get_outliers(all_feature_list, data_dict)
+
 my_dataset = data_dict
+
+# make a list of all persons in the dataset, add their outlier counts
+persons_list = []
+for p in my_dataset:
+	persons_list.append(p)
+	
+for person in persons_list:
+	my_dataset[person]["outlier_count"] = outliers[person]
+
+
 
 ### Extract features and labels from dataset for local testing
 data = featureFormat(my_dataset, features_list, sort_keys = True)
@@ -46,6 +70,13 @@ clf = GaussianNB()
 from sklearn.cross_validation import train_test_split
 features_train, features_test, labels_train, labels_test = \
     train_test_split(features, labels, test_size=0.3, random_state=42)
+    
+clf.fit(features_train, labels_train)
+pred = clf.predict(features_test)
+
+from sklearn.metrics import accuracy_score
+accuracy = accuracy_score(labels_test, pred)
+print accuracy
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
