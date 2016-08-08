@@ -13,8 +13,18 @@ from helper_functions import get_outliers
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
-features_list = ['poi', 'outlier_count'] # You will need to use more features
 
+# selecting all features, which I will later prune using feature selection
+features_list = (['poi','salary', 'to_messages', 'deferral_payments', 
+					'total_payments', 'exercised_stock_options', 'bonus', 
+					'restricted_stock', 'shared_receipt_with_poi', 
+					'restricted_stock_deferred', 'total_stock_value',
+					'expenses', 'loan_advances', 'from_messages', 'other', 
+					'from_this_person_to_poi', 'director_fees', 
+					'deferred_income', 'long_term_incentive', 
+					'from_poi_to_this_person', 'outlier_count']) # You will need to use more features
+
+#features_list = (['poi','bonus', 'salary'])
 
 
 ### Load the dictionary containing the dataset
@@ -43,11 +53,13 @@ for p in my_dataset:
 for person in persons_list:
 	my_dataset[person]["outlier_count"] = outliers[person]
 
+all_feature_list.append('outlier_count')
 
 
 ### Extract features and labels from dataset for local testing
 data = featureFormat(my_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
+
 
 ### Task 4: Try a varity of classifiers
 ### Please name your classifier clf for easy export below.
@@ -56,8 +68,30 @@ labels, features = targetFeatureSplit(data)
 ### http://scikit-learn.org/stable/modules/pipeline.html
 
 # Provided to give you a starting point. Try a variety of classifiers.
-from sklearn.naive_bayes import GaussianNB
-clf = GaussianNB()
+
+from sklearn.cross_validation import train_test_split
+features_train, features_test, labels_train, labels_test = \
+    train_test_split(features, labels, test_size=0.3, random_state=42)
+    
+def decision_tree_clf(features_train, labels_train):
+	from sklearn import tree
+	clf = tree.DecisionTreeClassifier()
+	return clf.fit(features_train, labels_train)
+
+def naive_bayes_clf(features_train, labels_train):
+	from sklearn.naive_bayes import GaussianNB
+	clf = GaussianNB()
+	return clf.fit(features_train, labels_train)
+
+def svm_clf(features_train, labels_train):
+	from sklearn import svm
+	clf = svm.SVC()
+	return clf.fit(features_train, labels_train)
+
+clf = svm_clf(features_train, labels_train)
+pred = clf.predict(features_test)
+
+
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
@@ -70,13 +104,36 @@ clf = GaussianNB()
 from sklearn.cross_validation import train_test_split
 features_train, features_test, labels_train, labels_test = \
     train_test_split(features, labels, test_size=0.3, random_state=42)
-    
-clf.fit(features_train, labels_train)
-pred = clf.predict(features_test)
 
-from sklearn.metrics import accuracy_score
-accuracy = accuracy_score(labels_test, pred)
-print accuracy
+
+# run SelectKBest on all features to get some sense of how to proceed
+#from sklearn.feature_selection import SelectKBest
+#selected = SelectKBest(k = 'all')
+#selected.fit(features_train, labels_train)
+
+#scores = selected.scores_
+#feature_scores = {}
+#for s in range(len(features_list)-1):
+	#feature_scores[features_list[s + 1]] = scores[s]
+	
+#for f in sorted(feature_scores, key=feature_scores.get, reverse=True):
+  #print f, feature_scores[f]
+
+from sklearn.pipeline import make_pipeline
+from sklearn.grid_search import GridSearchCV
+from sklearn.feature_selection import SelectKBest
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.naive_bayes import GaussianNB
+
+clf = make_pipeline(SelectKBest(), MinMaxScaler(), GaussianNB())
+param_grid = dict(selectkbest__k = [1,2,3,4,5,6,7,8,9,10,11])
+grid_search = GridSearchCV(clf, param_grid=param_grid, verbose=10, scoring = 'precision')
+grid_search.fit(features_train, labels_train)
+clf = (grid_search.best_estimator_)
+
+
+
+
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
