@@ -32,6 +32,8 @@
 		from_this_person_to_poi 0.105897968337
 		deferral_payments 0.00981944641905
 	My new variable, outlier_count, ranks 8th among all the features. It also appears that there are sharp dropoffs in feature importance - the first occuring between the 2nd and 3rd features, and the second occuring between the 11th and 12th. 
+	
+	In the end, I chose to use the top 6 features, and to skip the feature scaling step. My response in section 4 elaborates on these choices in context.
 
 	
 3. What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?  [relevant rubric item: “pick an algorithm”]
@@ -45,16 +47,49 @@
 
 4. What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?  How did you tune the parameters of your particular algorithm? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier).  [relevant rubric item: “tune the algorithm”]
 
-	Tuning the parameters of an algortihm means adjusting certain rules to achieve the best outcome. The naive bayes classifier does not have any parameters, so in this case the only tuning I could do was to adjust the k value for SelectKBest. I did this using the gridsearch library. Gridsearch runs the provided algorithm for every possible case provided, and returns the best possible classifier. "Best" is defined either using the default scoring function, or by the user. I experimented with some different scoring functions and got the following outputs:
-		Default: k = 1, Accuracy: 0.84240	Precision: 0.31909	Recall: 0.16050	F1: 0.21357	F2: 0.17821
+	Tuning the parameters of an algortihm means adjusting certain rules to achieve the best outcome. The naive bayes classifier does not have any parameters, so in this case "algorithm tuning", in the strictest sense, was not possible. However, there were other choices to be made and I used those to improve performance - namely, adjusting the k value for SelectKBest. I did this using the gridsearch library. Gridsearch runs the provided algorithm for every possible case provided, and returns the best possible classifier. "Best" is defined either using the default scoring function (accuracy), or by the user. I experimented with some different scoring functions and got the following outputs:
+		Default (best accuracy): k = 1, Accuracy: 0.84240	Precision: 0.31909	Recall: 0.16050	F1: 0.21357	F2: 0.17821
 		Optimize for precision: k = 6, Accuracy: 0.83787	Precision: 0.37050	Recall: 0.30900	F1: 0.33697	F2: 0.31961
 		Optimize for recall: k = 9, Accuracy: 0.83353	Precision: 0.34894	Recall: 0.28700	F1: 0.31495	F2: 0.29756
-	For the goals of this project, optimizing for precision produces the best output and is the only model that meets the criteria of accuracy and precision > 0.3.
+	
+	I also looked at whether feature scaling helped or hurt performance. All the numbers above were generated using the MinMaxScaler function as part of the pipeline. When I removed that step, I achieved the following output:
+		Default (best accuracy): k = 1, Accuracy: 0.84240	Precision: 0.31909	Recall: 0.16050	F1: 0.21357	F2: 0.17821
+		Optimize for precision: k = 6, Accuracy: 0.85173	Precision: 0.43009	Recall: 0.34450	F1: 0.38257	F2: 0.35878
+		Optimize for recall: k = 9, Accuracy: 0.84180	Precision: 0.37657	Recall: 0.28450	F1: 0.32412	F2: 0.29913
 
+	By all metrics, removing the MinMaxScaler improved performance. However, I found it interesting that it also seemed to break the scoring functionality. Regardless of the metric selected, optimizing for precision provided the best performance on ALL metrics. So my final choice for the model was to use SelectKBest with k = 6, no feature scaling, and naive bayes.
+	
+	Unlike my choice of naive bayes, many algorithms do require tuning to function well. For example, had I chosen to use SVM, I would have wanted to tune my kernel, c, and gamma values. While running SVM with the default values performed so poorly it was unable to even provide performance metrics, it is possible that with good tuning it could have performed better than the other two. Without the tuning process, it is impossible to know. Had I chosen to use SVM, I would have added the parameters to my gridsearch function.
 
 
 5. What is validation, and what’s a classic mistake you can make if you do it wrong? How did you validate your analysis?  [relevant rubric item: “validation strategy”]
 
+	Validation is the process of making sure you can trust the results of your model. In this project, cross-validation was used to test the algorithm on many different training and testing sets. Without cross-validation, the model and its performance could be skewed by the presence of outliers in the training or testing set. This could lead to inaccurate conclusions about the quality of the model.
+	
+	One mistake I could have made was to select my features prior to splitting my data for cross-validation. Were I to apply an algorithm like SelectKBest before creating my folds, overfitting could result. Instead, I used SelectKBest as part of my pipeline so that it was performed on each fold of the cross-validation process. 
+
 
 6. Give at least 2 evaluation metrics and your average performance for each of them.  Explain an interpretation of your metrics that says something human-understandable about your algorithm’s performance. [relevant rubric item: “usage of evaluation metrics”]
+	
+	Performance for my final model:
+	Accuracy: 0.85173	Precision: 0.43009	Recall: 0.34450	F1: 0.38257	F2: 0.35878
+	Total predictions: 15000	True positives:  689	False positives:  913	False negatives: 1311	True negatives: 12087
+	
+	Accuracy - the number of correct predictions divided by the total number of data points. Accuracy is most useful when you don't care which way the error goes. It can be hand-calculated using:
+		accuracy = (true positives + true negatives) / total predictions
+		
+	Precision and recall are useful when you want to bias the performance of an algorithm towards catching all true positives, or avoiding any false negatives. For example, if the IRS was using machine learning to identify cases of tax fraud, and they only want to go after parties that are definitely guilty. They would want a low number of false posities. For situations like this, precision is a better metric. Conversely, sometimes it is more important to avoid false negatives.  For example, if you were doing a cancer screening, it would be much better to have a false positive than a false negative. In this case, recall might be the most important metric.
+		precision = true positives / (true positives + false positives)
+		recall = true positives / (true positives + false negatives)
+		
+	In application to this project, the accuracy was about 85%. That means, of the 15,000 predictions made, 85% of them were correct. But that doesn't tell us anything about false positives vs. false negatives. The precision was about 43%. That means 43% of the POIs that were labeled as such, were actually POIs. Recall, by comparison, was about 34%. This means the algorithm caught 34% of the POIs.
+	
+	
+	
+
+	
+
+	
+	
+	
 

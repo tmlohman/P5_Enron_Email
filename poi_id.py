@@ -124,12 +124,14 @@ from sklearn.grid_search import GridSearchCV
 from sklearn.feature_selection import SelectKBest
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import precision_score, recall_score
 
-clf = make_pipeline(SelectKBest(), MinMaxScaler(), GaussianNB())
+clf = make_pipeline(SelectKBest(), GaussianNB())
 param_grid = dict(selectkbest__k = [1,2,3,4,5,6,7,8,9,10,11])
 grid_search = GridSearchCV(clf, param_grid=param_grid, verbose=10, scoring = 'precision')
 grid_search.fit(features_train, labels_train)
 clf = (grid_search.best_estimator_)
+
 
 
 
