@@ -6,3 +6,5 @@ https://www.quora.com/How-do-I-properly-use-SelectKBest-GridSearchCV-and-cross-v
 http://scikit-learn.org/stable/modules/svm.html
 https://discussions.udacity.com/t/confusion-about-order-of-operations-in-poi-id-file-feature-selection/182193/2
 http://stackoverflow.com/questions/613183/sort-a-python-dictionary-by-value
+http://machinelearningmastery.com/how-to-tune-algorithm-parameters-with-scikit-learn/
+http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html#sklearn.tree.DecisionTreeClassifier
