@@ -7,5 +7,5 @@ The goal of this project was to use machine learning classification techniques t
 [project_documentation.txt](https://github.com/tmlohman/P5_Enron_Email/blob/master/project_documentation.txt) - Describes approach, techniques applied, and rationale.  
 
 ### Project Code
-[explore_enron_data.py](https://github.com/tmlohman/P5_Enron_Email/blob/master/explore_enron_data.py) - Initial data exploration and outlier detection . 
+[explore_enron_data.py](https://github.com/tmlohman/P5_Enron_Email/blob/master/explore_enron_data.py) - Initial data exploration and outlier detection .   
 [poi_id.py](https://github.com/tmlohman/P5_Enron_Email/blob/master/poi_id.py) - Main project code . 
